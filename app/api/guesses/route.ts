@@ -9,14 +9,14 @@ export function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, gender, weight_lbs, weight_oz, birth_date, birth_time, length_in } = body;
+  const { name, gender, weight_lbs, weight_oz, birth_date, length_in } = body;
+  const birth_time = '00:00';
 
   if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   if (gender !== 'boy' && gender !== 'girl') return NextResponse.json({ error: 'Invalid gender' }, { status: 400 });
   if (!Number.isInteger(weight_lbs) || weight_lbs < 1 || weight_lbs > 20) return NextResponse.json({ error: 'Invalid weight (lbs)' }, { status: 400 });
   if (!Number.isInteger(weight_oz) || weight_oz < 0 || weight_oz > 15) return NextResponse.json({ error: 'Invalid weight (oz)' }, { status: 400 });
   if (!birth_date || !/^\d{4}-\d{2}-\d{2}$/.test(birth_date)) return NextResponse.json({ error: 'Invalid birth date' }, { status: 400 });
-  if (!birth_time || !/^\d{2}:\d{2}$/.test(birth_time)) return NextResponse.json({ error: 'Invalid birth time' }, { status: 400 });
   if (typeof length_in !== 'number' || length_in < 10 || length_in > 30) return NextResponse.json({ error: 'Invalid length' }, { status: 400 });
 
   const result = getDb()

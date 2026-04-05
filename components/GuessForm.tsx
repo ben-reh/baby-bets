@@ -10,7 +10,6 @@ interface FormState {
   weight_lbs: string;
   weight_oz: string;
   birth_date: string;
-  birth_time: string;
   length_in: string;
 }
 
@@ -20,7 +19,6 @@ const empty: FormState = {
   weight_lbs: '',
   weight_oz: '',
   birth_date: '',
-  birth_time: '',
   length_in: '',
 };
 
@@ -48,7 +46,6 @@ export default function GuessForm() {
           weight_lbs: parseInt(form.weight_lbs),
           weight_oz: parseInt(form.weight_oz),
           birth_date: form.birth_date,
-          birth_time: form.birth_time,
           length_in: parseFloat(form.length_in),
         }),
       });
@@ -165,18 +162,6 @@ export default function GuessForm() {
           required
           value={form.birth_date}
           onChange={(e) => set('birth_date', e.target.value)}
-          className={inputClass}
-        />
-      </div>
-
-      {/* Birth time */}
-      <div>
-        <label className={labelClass}>Time of birth</label>
-        <input
-          type="time"
-          required
-          value={form.birth_time}
-          onChange={(e) => set('birth_time', e.target.value)}
           className={inputClass}
         />
       </div>

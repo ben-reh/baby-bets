@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Guess } from '@/lib/types';
-import { computeStats, weightOdds, dateOdds, lengthOdds, formatDate, formatTime } from '@/lib/stats';
+import { computeStats, weightOdds, dateOdds, lengthOdds, formatDate } from '@/lib/stats';
 import type { OddsRow } from '@/lib/stats';
 
 function OddsTable({ rows, label, header, footer }: { rows: OddsRow[]; label: string; header?: React.ReactNode; footer?: React.ReactNode }) {
@@ -165,8 +165,6 @@ export default function GuessFeed({ initialGuesses }: { initialGuesses: Guess[] 
                 <span className="text-gray-400 tabular-nums">{g.weight_lbs} lbs {g.weight_oz} oz</span>
                 <span className="text-gray-600">·</span>
                 <span className="text-gray-400">{formatDate(g.birth_date)}</span>
-                <span className="text-gray-600">·</span>
-                <span className="text-gray-400">{formatTime(g.birth_time)}</span>
                 <span className="text-gray-600">·</span>
                 <span className="text-gray-400 tabular-nums">{g.length_in}&quot;</span>
               </div>
