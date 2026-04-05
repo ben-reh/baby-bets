@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+  --color-boy: #3b82f6;
+  --color-girl: #ec4899;
+}
