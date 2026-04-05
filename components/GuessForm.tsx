@@ -67,12 +67,12 @@ export default function GuessForm() {
         <div className="text-7xl mb-6">🎉</div>
         <h2 className="text-3xl font-bold text-gray-800 mb-3">You&apos;re entered!</h2>
         <p className="text-gray-500 mb-8 text-lg">Good luck — may your guess be right!</p>
-        <button
-          onClick={() => { setForm(empty); setStatus('idle'); }}
-          className="bg-purple-500 text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-purple-600 transition"
+        <a
+          href="/dashboard"
+          className="inline-block bg-purple-500 text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-purple-600 transition"
         >
-          Submit another guess
-        </button>
+          See the leaderboard 📊
+        </a>
       </div>
     );
   }
