@@ -18,7 +18,7 @@ const empty: FormState = {
   gender: '',
   weight_lbs: '',
   weight_oz: '',
-  birth_date: '',
+  birth_date: '2026-08-08',
   length_in: '',
 };
 
