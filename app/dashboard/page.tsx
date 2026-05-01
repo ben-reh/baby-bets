@@ -1,4 +1,5 @@
-import { getDb } from '@/db';
+import { ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { dynamo, TABLE } from '@/lib/dynamo';
 import type { Guess } from '@/lib/types';
 import GuessFeed from '@/components/Dashboard/GuessFeed';
 import QRCode from 'qrcode';
@@ -6,7 +7,9 @@ import QRCode from 'qrcode';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const guesses = getDb().prepare('SELECT * FROM guesses ORDER BY created_at DESC').all() as Guess[];
+  const result = await dynamo.send(new ScanCommand({ TableName: TABLE }));
+  const guesses = ((result.Items ?? []) as Guess[])
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
   const appUrl = (process.env.APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
   const qrDataUrl = await QRCode.toDataURL(appUrl + '/', {

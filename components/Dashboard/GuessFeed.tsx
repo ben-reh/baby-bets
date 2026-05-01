@@ -151,16 +151,16 @@ export default function GuessFeed({ initialGuesses }: { initialGuesses: Guess[] 
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
-    const es = new EventSource('/api/stream');
-    es.onmessage = async () => {
+    const poll = async () => {
       try {
         const res = await fetch('/api/guesses');
         const data: Guess[] = await res.json();
         setGuesses(data);
         setLastUpdate(new Date());
-      } catch { /* retry on next ping */ }
+      } catch { /* retry on next interval */ }
     };
-    return () => es.close();
+    const interval = setInterval(poll, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const stats = computeStats(guesses);

@@ -1,5 +1,5 @@
 export interface Guess {
-  id: number;
+  id: string;         // UUID
   name: string;
   gender: 'boy' | 'girl';
   weight_lbs: number;
@@ -7,7 +7,7 @@ export interface Guess {
   birth_date: string; // "YYYY-MM-DD"
   birth_time: string; // "HH:MM"
   length_in: number;
-  created_at: string;
+  created_at: string; // ISO 8601
 }
 
 export interface Stats {
