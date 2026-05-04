@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     await dynamo.send(new PutCommand({ TableName: TABLE, Item: item }));
   } catch (err) {
     console.error('POST /api/guesses failed:', err);
-    return NextResponse.json({ error: 'Failed to save guess' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save guess', detail: String(err) }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, id: item.id });
