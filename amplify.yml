@@ -4,13 +4,22 @@ frontend:
     preBuild:
       commands:
         - npm ci
+        - |
+          cat > .env.production.local << EOF
+          DYNAMODB_REGION=${DYNAMODB_REGION}
+          DYNAMODB_TABLE=${DYNAMODB_TABLE}
+          DYNAMODB_ACCESS_KEY_ID=${DYNAMODB_ACCESS_KEY_ID}
+          DYNAMODB_SECRET_ACCESS_KEY=${DYNAMODB_SECRET_ACCESS_KEY}
+          APP_URL=${APP_URL}
+          EOF
     build:
       commands:
         - npm run build
   artifacts:
-    baseDirectory: .next
+    baseDirectory: .
     files:
-      - '**/*'
+      - .next/**/*
+      - .env.production.local
   cache:
     paths:
       - node_modules/**/*
