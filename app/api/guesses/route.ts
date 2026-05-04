@@ -5,10 +5,15 @@ import type { Guess } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function GET() {
-  const result = await dynamo.send(new ScanCommand({ TableName: TABLE }));
-  const guesses = (result.Items ?? []) as Guess[];
-  guesses.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  return NextResponse.json(guesses);
+  try {
+    const result = await dynamo.send(new ScanCommand({ TableName: TABLE }));
+    const guesses = (result.Items ?? []) as Guess[];
+    guesses.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return NextResponse.json(guesses);
+  } catch (err) {
+    console.error('GET /api/guesses failed:', err);
+    return NextResponse.json({ error: 'Failed to load guesses' }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -34,7 +39,12 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   };
 
-  await dynamo.send(new PutCommand({ TableName: TABLE, Item: item }));
+  try {
+    await dynamo.send(new PutCommand({ TableName: TABLE, Item: item }));
+  } catch (err) {
+    console.error('POST /api/guesses failed:', err);
+    return NextResponse.json({ error: 'Failed to save guess' }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true, id: item.id });
 }

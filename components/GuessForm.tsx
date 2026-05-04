@@ -49,8 +49,9 @@ export default function GuessForm() {
           length_in: parseFloat(form.length_in),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Something went wrong'); setStatus('error'); return; }
+      let data: { error?: string; ok?: boolean; id?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
+      if (!res.ok) { setError(data.error ?? `Server error (${res.status})`); setStatus('error'); return; }
       setStatus('success');
     } catch {
       setError('Network error — please try again');
