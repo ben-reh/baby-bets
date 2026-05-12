@@ -15,18 +15,18 @@ export default async function DashboardPage() {
   const qrDataUrl = await QRCode.toDataURL(appUrl + '/', {
     width: 160,
     margin: 1,
-    color: { dark: '#ffffff', light: '#111827' },
+    color: { dark: '#4338CA', light: '#ffffff' },
   });
 
   return (
-    <main className="min-h-screen bg-gray-950 text-gray-100 p-4 font-mono">
-      <div className="flex items-center gap-6 bg-gray-900 border border-gray-700 rounded-xl px-6 py-4 mb-4">
+    <main className="min-h-screen bg-stone-50 text-gray-900 p-4">
+      <div className="flex items-center gap-6 bg-white border border-gray-200 rounded-xl px-6 py-4 mb-4 shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={qrDataUrl} alt="QR code" width={80} height={80} className="rounded-lg shrink-0" />
         <div>
-          <div className="text-white font-bold text-lg">Scan to make your guess!</div>
-          <div className="text-gray-400 text-sm mt-0.5">Pick the gender, weight, birth date, and length.</div>
-          <div className="text-gray-500 text-xs mt-1 font-mono">{appUrl}</div>
+          <div className="text-gray-900 font-bold text-lg">Scan to make your guess!</div>
+          <div className="text-gray-500 text-sm mt-0.5">Pick the gender, weight, birth date, and length.</div>
+          <div className="text-gray-400 text-xs mt-1 font-mono">{appUrl}</div>
         </div>
       </div>
       <GuessFeed initialGuesses={guesses} />
