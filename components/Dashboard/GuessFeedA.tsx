@@ -2,37 +2,125 @@
 
 import { useEffect, useState } from 'react';
 import type { Guess } from '@/lib/types';
-import { computeStats, weightOdds, lengthOdds, formatDate, avgBirthDate } from '@/lib/stats';
-import type { OddsRow } from '@/lib/stats';
+import { computeStats, formatDate, avgBirthDate } from '@/lib/stats';
 
-function OddsTable({ rows, label, header, footer }: { rows: OddsRow[]; label: string; header?: React.ReactNode; footer?: React.ReactNode }) {
-  const max = rows[0]?.pct ?? 1;
+function barColor(count: number, maxCount: number): string {
+  if (count === 0 || maxCount === 0) return 'bg-gray-100';
+  const r = count / maxCount;
+  if (r <= 0.2) return 'bg-violet-200';
+  if (r <= 0.4) return 'bg-violet-300';
+  if (r <= 0.6) return 'bg-violet-400';
+  if (r <= 0.8) return 'bg-violet-500';
+  return 'bg-violet-600';
+}
+
+const WEIGHT_BUCKETS = (() => {
+  const out: { label: string; lbs: number; ozMin: number; ozMax: number }[] = [];
+  for (let lbs = 5; lbs <= 10; lbs++) {
+    const maxOz = lbs === 10 ? 8 : 15;
+    for (let oz = 0; oz <= maxOz; oz += 4)
+      out.push({ label: oz === 0 ? String(lbs) : '', lbs, ozMin: oz, ozMax: Math.min(oz + 3, maxOz) });
+  }
+  return out;
+})();
+
+function WeightHistogram({ guesses, avgWeightLbs, avgWeightOz }: { guesses: Guess[]; avgWeightLbs: number; avgWeightOz: number }) {
+  const buckets = WEIGHT_BUCKETS.map(b => ({
+    ...b,
+    count: guesses.filter(g => g.weight_lbs === b.lbs && g.weight_oz >= b.ozMin && g.weight_oz <= b.ozMax).length,
+  }));
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+  const total = guesses.length;
   return (
-    <div className="h-full bg-white border border-gray-200 rounded-xl p-3 flex flex-col gap-2">
-      <div className="text-sm font-bold tracking-widest text-gray-400 uppercase shrink-0">{label}</div>
-      {header}
-      {rows.length === 0 ? (
-        <div className="text-gray-400 text-base">No data yet</div>
+    <div className="h-full bg-white border border-gray-200 rounded-xl p-3 flex flex-col">
+      <div className="text-sm font-bold tracking-widest text-gray-400 uppercase shrink-0 mb-2">Weight Distribution</div>
+      <div className="shrink-0 border-b border-gray-100 pb-2 mb-2 space-y-0.5">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Ben&apos;s birth weight</span>
+          <span className="text-gray-700 tabular-nums font-medium">7 lbs 11 oz</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Tess&apos;s birth weight</span>
+          <span className="text-gray-700 tabular-nums font-medium">8 lbs 4 oz</span>
+        </div>
+      </div>
+      {total === 0 ? (
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
       ) : (
-        rows.map((row, i) => (
-          <div key={row.label} className="space-y-1">
-            <div className="flex justify-between text-base">
-              <span className={i === 0 ? 'text-violet-700 font-bold' : 'text-gray-600'}>{row.label}</span>
-              <span className={`font-bold tabular-nums ${i === 0 ? 'text-violet-700' : 'text-gray-400'}`}>
-                {row.pct}%
-                <span className="text-gray-400 font-normal ml-1">({row.count})</span>
-              </span>
-            </div>
-            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${i === 0 ? 'bg-violet-500' : 'bg-gray-300'}`}
-                style={{ width: `${(row.pct / max) * 100}%` }}
-              />
-            </div>
+        <div className="flex-1 min-h-0 flex flex-col gap-1">
+          <div className="flex-1 min-h-0 flex items-end gap-px">
+            {buckets.map((b, i) => {
+              const pct = Math.round((b.count / total) * 100);
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-0.5">
+                  {b.count > 0 && <span className="text-[9px] leading-none text-gray-500 tabular-nums">{pct}%</span>}
+                  <div className={`w-full rounded-t-sm transition-all duration-500 ${barColor(b.count, maxCount)}`}
+                    style={{ height: `${(b.count / maxCount) * 100}%`, minHeight: b.count > 0 ? '3px' : '0px' }} />
+                </div>
+              );
+            })}
           </div>
-        ))
+          <div className="shrink-0 flex gap-px">
+            {buckets.map((b, i) => <div key={i} className="flex-1 text-center text-[10px] text-gray-400">{b.label}</div>)}
+          </div>
+          <div className="shrink-0 text-center text-[10px] text-gray-400">lbs</div>
+        </div>
       )}
-      {footer}
+      {total > 0 && (
+        <div className="shrink-0 border-t border-gray-100 pt-2 mt-2 flex justify-between text-sm">
+          <span className="text-gray-400">Avg guess</span>
+          <span className="text-gray-700 tabular-nums font-medium">{avgWeightLbs} lbs {avgWeightOz} oz</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const LENGTH_BUCKETS = (() => {
+  const out: { label: string; value: number }[] = [];
+  for (let v = 17; v <= 22; v += 0.5)
+    out.push({ label: v % 1 === 0 ? String(v) : '', value: v });
+  return out;
+})();
+
+function LengthHistogram({ guesses, avgLengthIn }: { guesses: Guess[]; avgLengthIn: number }) {
+  const buckets = LENGTH_BUCKETS.map(b => ({
+    ...b,
+    count: guesses.filter(g => Math.abs(g.length_in - b.value) < 0.01).length,
+  }));
+  const maxCount = Math.max(...buckets.map(b => b.count), 1);
+  const total = guesses.length;
+  return (
+    <div className="h-full bg-white border border-gray-200 rounded-xl p-3 flex flex-col">
+      <div className="text-sm font-bold tracking-widest text-gray-400 uppercase shrink-0 mb-3">Length Distribution</div>
+      {total === 0 ? (
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">No data yet</div>
+      ) : (
+        <div className="flex-1 min-h-0 flex flex-col gap-1">
+          <div className="flex-1 min-h-0 flex items-end gap-px">
+            {buckets.map((b, i) => {
+              const pct = Math.round((b.count / total) * 100);
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-0.5">
+                  {b.count > 0 && <span className="text-[9px] leading-none text-gray-500 tabular-nums">{pct}%</span>}
+                  <div className={`w-full rounded-t-sm transition-all duration-500 ${barColor(b.count, maxCount)}`}
+                    style={{ height: `${(b.count / maxCount) * 100}%`, minHeight: b.count > 0 ? '3px' : '0px' }} />
+                </div>
+              );
+            })}
+          </div>
+          <div className="shrink-0 flex gap-px">
+            {buckets.map((b, i) => <div key={i} className="flex-1 text-center text-[10px] text-gray-400">{b.label}</div>)}
+          </div>
+          <div className="shrink-0 text-center text-[10px] text-gray-400">inches</div>
+        </div>
+      )}
+      {total > 0 && (
+        <div className="shrink-0 border-t border-gray-100 pt-2 mt-2 flex justify-between text-sm">
+          <span className="text-gray-400">Avg guess</span>
+          <span className="text-gray-700 tabular-nums font-medium">{avgLengthIn}&quot;</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -146,16 +234,18 @@ function BirthDateGrid({ guesses }: { guesses: Guess[] }) {
       </div>
 
       <div className="shrink-0 mt-2 pt-2 border-t border-gray-200 flex items-center gap-3 text-[10px] text-gray-400">
-        <span className="shrink-0">None</span>
-        <div className="flex gap-0.5">
-          {['bg-gray-100','bg-violet-200','bg-violet-300','bg-violet-400','bg-violet-500','bg-violet-600'].map((bg, i) => (
-            <div key={i} className={`w-3 h-2.5 rounded-sm ${bg}`} />
-          ))}
-        </div>
-        <span className="shrink-0">Popular</span>
-        <div className="ml-auto flex items-center gap-1.5 shrink-0">
-          <div className="w-3 h-3 rounded-sm ring-2 ring-amber-400 bg-gray-100" />
+        <div className="flex items-center gap-1.5 shrink-0 text-[12px]">
+          <div className="w-3.5 h-3.5 rounded-sm ring-2 ring-amber-400 bg-gray-100" />
           <span>Due Date (Aug 8)</span>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5 shrink-0">
+          <span className="shrink-0">None</span>
+          <div className="flex gap-0.5">
+            {['bg-gray-100','bg-violet-200','bg-violet-300','bg-violet-400','bg-violet-500','bg-violet-600'].map((bg, i) => (
+              <div key={i} className={`w-3 h-2.5 rounded-sm ${bg}`} />
+            ))}
+          </div>
+          <span className="shrink-0">Popular</span>
         </div>
       </div>
       {total > 0 && (
@@ -188,33 +278,6 @@ export default function GuessFeedA({ initialGuesses }: { initialGuesses: Guess[]
   const stats = computeStats(guesses);
   const recent = guesses.slice(0, 8);
   const boyLeads = stats.boyPct >= stats.girlPct;
-
-  const weightHeader = (
-    <div className="shrink-0 border-b border-gray-100 pb-2 mb-0.5 space-y-0.5">
-      <div className="flex justify-between text-sm">
-        <span className="text-gray-400">Ben&apos;s birth weight</span>
-        <span className="text-gray-700 tabular-nums font-medium">7 lbs 11 oz</span>
-      </div>
-      <div className="flex justify-between text-sm">
-        <span className="text-gray-400">Tess&apos;s birth weight</span>
-        <span className="text-gray-700 tabular-nums font-medium">8 lbs 4 oz</span>
-      </div>
-    </div>
-  );
-
-  const weightFooter = stats.total > 0 ? (
-    <div className="shrink-0 border-t border-gray-100 pt-2 mt-auto flex justify-between text-sm">
-      <span className="text-gray-400">Avg guess</span>
-      <span className="text-gray-700 tabular-nums font-medium">{stats.avgWeightLbs} lbs {stats.avgWeightOz} oz</span>
-    </div>
-  ) : null;
-
-  const lengthFooter = stats.total > 0 ? (
-    <div className="shrink-0 border-t border-gray-100 pt-2 mt-auto flex justify-between text-sm">
-      <span className="text-gray-400">Avg guess</span>
-      <span className="text-gray-700 tabular-nums font-medium">{stats.avgLengthIn}&quot;</span>
-    </div>
-  ) : null;
 
   return (
     <div className="h-full flex flex-col gap-2">
@@ -285,8 +348,8 @@ export default function GuessFeedA({ initialGuesses }: { initialGuesses: Guess[]
       {/* Row 2: Recent + Weight + Length — equal height to row 1 */}
       <div className="flex-1 min-h-0 grid grid-cols-3 gap-2">
 
-        <OddsTable rows={weightOdds(guesses)} label="Weight Odds" header={weightHeader} footer={weightFooter} />
-        <OddsTable rows={lengthOdds(guesses)} label="Length Odds" footer={lengthFooter} />
+        <WeightHistogram guesses={guesses} avgWeightLbs={stats.avgWeightLbs} avgWeightOz={stats.avgWeightOz} />
+        <LengthHistogram guesses={guesses} avgLengthIn={stats.avgLengthIn} />
 
         {/* Recent Activity */}
         <div className="h-full bg-white border border-gray-200 rounded-xl p-3 flex flex-col">
