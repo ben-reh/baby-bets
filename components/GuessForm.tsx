@@ -233,6 +233,30 @@ export default function GuessForm() {
           </div>
         </div>
 
+        {/* Birth date */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="text-sm font-semibold text-gray-600">Birth date</span>
+            <button
+              type="button"
+              onClick={() => setShowInfo(true)}
+              className="text-gray-400 hover:text-purple-500 transition"
+              aria-label="About birth date ranges"
+            >
+              <InfoIcon />
+            </button>
+          </div>
+          <input
+            type="date"
+            required
+            min={MIN_DATE}
+            max={MAX_DATE}
+            value={form.birth_date}
+            onChange={(e) => set('birth_date', e.target.value)}
+            className={inputClass}
+          />
+        </div>
+
         {/* Weight */}
         <div>
           <div className="flex items-center gap-1.5 mb-1">
@@ -274,30 +298,6 @@ export default function GuessForm() {
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">oz</span>
             </div>
           </div>
-        </div>
-
-        {/* Birth date */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-sm font-semibold text-gray-600">Birth date</span>
-            <button
-              type="button"
-              onClick={() => setShowInfo(true)}
-              className="text-gray-400 hover:text-purple-500 transition"
-              aria-label="About birth date ranges"
-            >
-              <InfoIcon />
-            </button>
-          </div>
-          <input
-            type="date"
-            required
-            min={MIN_DATE}
-            max={MAX_DATE}
-            value={form.birth_date}
-            onChange={(e) => set('birth_date', e.target.value)}
-            className={inputClass}
-          />
         </div>
 
         {/* Length */}
