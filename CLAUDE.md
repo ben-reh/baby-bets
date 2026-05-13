@@ -26,9 +26,26 @@ npm run start    # Start production server
 ## Environment Variables
 
 ```
-DB_PATH=./baby_bets.db       # path to SQLite file (relative to project root or absolute)
-APP_URL=http://localhost:3000 # used by /qr page to generate the QR code URL
+APP_URL=http://localhost:3000          # used by /qr page to generate the QR code URL
+DYNAMODB_REGION=us-east-1             # AWS region
+DYNAMODB_TABLE=baby-bets-guesses-test # table name (see Databases below)
+DYNAMODB_ACCESS_KEY_ID=...            # only needed if not using default AWS credentials
+DYNAMODB_SECRET_ACCESS_KEY=...        # only needed if not using default AWS credentials
 ```
+
+## Databases
+
+Two DynamoDB tables in `us-east-1`:
+
+| Environment | Table |
+|-------------|-------|
+| Local dev   | `baby-bets-guesses-test` |
+| Production  | `baby-bets-guesses` |
+
+`.env.local` sets `DYNAMODB_TABLE=baby-bets-guesses-test` so local dev always hits the test table.
+Amplify env vars set `DYNAMODB_TABLE=baby-bets-guesses` for production.
+
+To seed the test table: `node scripts/seed.mjs`
 
 ## Deployment
 
