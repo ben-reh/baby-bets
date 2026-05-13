@@ -100,6 +100,17 @@ export function formatDate(iso: string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+export function avgBirthDate(guesses: Guess[]): string | null {
+  if (guesses.length === 0) return null;
+  const avgMs = guesses.reduce((sum, g) => {
+    const [y, m, d] = g.birth_date.split('-').map(Number);
+    return sum + new Date(y, m - 1, d).getTime();
+  }, 0) / guesses.length;
+  const d = new Date(avgMs);
+  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return formatDate(iso);
+}
+
 export function formatTime(hhmm: string): string {
   const [h, m] = hhmm.split(':').map(Number);
   const ampm = h >= 12 ? 'PM' : 'AM';

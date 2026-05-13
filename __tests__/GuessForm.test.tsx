@@ -1,11 +1,22 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import GuessForm from '@/components/GuessForm';
 
+jest.mock('@/lib/validation', () => ({
+  ...jest.requireActual('@/lib/validation'),
+  validateGuess: jest.fn(() => []),
+}));
+
+import { validateGuess } from '@/lib/validation';
+const mockValidateGuess = validateGuess as jest.Mock;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  mockValidateGuess.mockReturnValue([]);
 });
+
+afterEach(cleanup);
 
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>, opts: { gender?: 'boy' | 'girl' } = {}) {
   await user.type(screen.getByPlaceholderText(/aunt sarah/i), 'Test User');
@@ -87,6 +98,44 @@ describe('GuessForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/network error/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows validation modal with weight error', async () => {
+    mockValidateGuess.mockReturnValue(['Weight must be between 5 lbs 0 oz and 10 lbs 8 oz']);
+    render(<GuessForm />);
+    const user = userEvent.setup();
+    await fillRequiredFields(user, { gender: 'boy' });
+    await user.click(screen.getByRole('button', { name: /submit my guess/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/invalid guess/i)).toBeInTheDocument();
+      expect(screen.getByText(/weight must be/i)).toBeInTheDocument();
+    });
+  });
+
+  it('closes validation modal when fix button is clicked', async () => {
+    mockValidateGuess.mockReturnValue(['Weight must be between 5 lbs 0 oz and 10 lbs 8 oz']);
+    render(<GuessForm />);
+    const user = userEvent.setup();
+    await fillRequiredFields(user, { gender: 'boy' });
+    await user.click(screen.getByRole('button', { name: /submit my guess/i }));
+
+    await waitFor(() => expect(screen.getByText(/invalid guess/i)).toBeInTheDocument());
+    await user.click(screen.getByRole('button', { name: /fix my guess/i }));
+    expect(screen.queryByText(/invalid guess/i)).not.toBeInTheDocument();
+  });
+
+  it('shows validation modal with length error', async () => {
+    mockValidateGuess.mockReturnValue(['Length must be between 17 and 22 inches']);
+    render(<GuessForm />);
+    const user = userEvent.setup();
+    await fillRequiredFields(user, { gender: 'girl' });
+    await user.click(screen.getByRole('button', { name: /submit my guess/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/invalid guess/i)).toBeInTheDocument();
+      expect(screen.getByText(/length must be/i)).toBeInTheDocument();
     });
   });
 });

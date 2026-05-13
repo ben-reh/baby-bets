@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Guess } from '@/lib/types';
-import { computeStats, weightOdds, lengthOdds, formatDate } from '@/lib/stats';
+import { computeStats, weightOdds, lengthOdds, formatDate, avgBirthDate } from '@/lib/stats';
 import type { OddsRow } from '@/lib/stats';
 
 function OddsTable({ rows, label, header, footer }: { rows: OddsRow[]; label: string; header?: React.ReactNode; footer?: React.ReactNode }) {
@@ -92,14 +92,6 @@ function DateCell({ day, count, total }: { day: Date; count: number; total: numb
   );
 }
 
-function avgBirthDate(guesses: Guess[]): string | null {
-  if (guesses.length === 0) return null;
-  const avg = guesses.reduce((sum, g) => {
-    const [y, m, d] = g.birth_date.split('-').map(Number);
-    return sum + new Date(y, m - 1, d).getTime();
-  }, 0) / guesses.length;
-  return formatDate(toIso(new Date(avg)));
-}
 
 function BirthDateGrid({ guesses }: { guesses: Guess[] }) {
   const counts: Record<string, number> = {};

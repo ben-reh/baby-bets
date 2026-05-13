@@ -1,4 +1,4 @@
-import { computeStats, weightOdds, lengthOdds, formatDate, formatTime } from '@/lib/stats';
+import { computeStats, weightOdds, lengthOdds, formatDate, formatTime, avgBirthDate } from '@/lib/stats';
 import type { Guess } from '@/lib/types';
 
 const makeGuess = (overrides: Partial<Guess> = {}): Guess => ({
@@ -124,5 +124,42 @@ describe('formatTime', () => {
     expect(formatTime('13:30')).toBe('1:30 PM');
     expect(formatTime('12:00')).toBe('12:00 PM');
     expect(formatTime('09:05')).toBe('9:05 AM');
+  });
+});
+
+describe('avgBirthDate', () => {
+  it('returns null for empty array', () => {
+    expect(avgBirthDate([])).toBeNull();
+  });
+
+  it('returns the formatted date for a single guess', () => {
+    expect(avgBirthDate([makeGuess({ birth_date: '2026-08-08' })])).toBe('Aug 8');
+  });
+
+  it('averages two dates correctly', () => {
+    const guesses = [
+      makeGuess({ birth_date: '2026-08-06' }),
+      makeGuess({ birth_date: '2026-08-08' }),
+    ];
+    // midpoint of Aug 6 and Aug 8 = Aug 7
+    expect(avgBirthDate(guesses)).toBe('Aug 7');
+  });
+
+  it('averages dates spanning July and August', () => {
+    const guesses = [
+      makeGuess({ birth_date: '2026-07-25' }),
+      makeGuess({ birth_date: '2026-08-08' }),
+    ];
+    // midpoint of Jul 25 and Aug 8 = Aug 1
+    expect(avgBirthDate(guesses)).toBe('Aug 1');
+  });
+
+  it('handles multiple guesses on the same date', () => {
+    const guesses = [
+      makeGuess({ birth_date: '2026-08-08' }),
+      makeGuess({ birth_date: '2026-08-08' }),
+      makeGuess({ birth_date: '2026-08-08' }),
+    ];
+    expect(avgBirthDate(guesses)).toBe('Aug 8');
   });
 });
