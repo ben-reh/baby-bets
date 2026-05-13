@@ -30,10 +30,6 @@ DB_PATH=./baby_bets.db       # path to SQLite file (relative to project root or 
 APP_URL=http://localhost:3000 # used by /qr page to generate the QR code URL
 ```
 
-## Deployment (Railway)
+## Deployment
 
-1. Create Railway service, connect GitHub repo
-2. Add persistent volume mounted at `/data`
-3. Set env vars: `DB_PATH=/data/baby_bets.db`, `APP_URL=https://<subdomain>.up.railway.app`
-4. Railway auto-detects Next.js and runs `npm run build && npm start`
-5. Navigate to `/qr` after deploy to get the printable QR code
+This project is **not deployed on Railway**. Deployment platform TBD.
