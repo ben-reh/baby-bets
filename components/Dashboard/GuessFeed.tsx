@@ -192,7 +192,7 @@ export default function GuessFeed({ initialGuesses }: { initialGuesses: Guess[] 
   }, []);
 
   const stats = computeStats(guesses);
-  const recent = guesses.slice(0, 5);
+  const recent = guesses;
   const boyLeads = stats.boyPct >= stats.girlPct;
 
   const weightHeader = (
